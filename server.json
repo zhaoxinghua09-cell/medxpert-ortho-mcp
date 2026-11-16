@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.zhaoxinghua09-cell/medxpert-ortho-mcp",
   "title": "MedXpert 骨科器械检测对接（8 工具）",
-  "description": "Orthopedic device testing connector: lab matching, quotation estimation, UDI checks, dual-temporal standards lookup, class/path judgment trees, region routes, registration timelines and gap reports. Offline, zero dependencies, illustrative sample data bundled.",
+  "description": "Orthopedic device testing MCP: lab match, quotes, UDI, standards, timelines, gap reports. Offline.",
   "version": "0.1.0",
   "websiteUrl": "https://medxpert.cn",
   "repository": {
