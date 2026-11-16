@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medxpert-ortho-mcp"
+description = "Orthopedic device testing connector MCP server: lab matching, quotations, UDI, dual-temporal standards lookup, judgment trees, region routes, timelines, gap reports. Offline, zero dependencies, illustrative sample data."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Zhao Xinghua (Steven Zhao)", email = "zhaoxinghua09@gmail.com" }]
+keywords = ["mcp", "model-context-protocol", "medical-device", "orthopedic", "udi", "standards", "offline"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Healthcare Industry",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Medical Science Apps.",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.scripts]
+medxpert-ortho-mcp = "medxpert_ortho.server:main"
+medxpert-ortho = "medxpert_ortho.server:main"
+
+[project.urls]
+Homepage = "https://medxpert.cn"
+Repository = "https://github.com/zhaoxinghua09-cell/medxpert-ortho-mcp"
+Issues = "https://github.com/zhaoxinghua09-cell/medxpert-ortho-mcp/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "medxpert_ortho.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["medxpert_ortho*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+medxpert_ortho = ["datasets/*.json"]

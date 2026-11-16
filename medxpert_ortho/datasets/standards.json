@@ -1,0 +1,64 @@
+{
+  "_disclaimer": "示例数据：标准号与题名为真实公开标准，状态字段仅用于演示双时态判定逻辑，请以官方现行版本为准。",
+  "standards": [
+    {
+      "code": "GB/T 16886.1",
+      "title": "医疗器械生物学评价 第1部分：风险管理过程中的评价与试验",
+      "status": "current",
+      "adoption_date": "2022-04-15",
+      "effective_date": "2023-05-01",
+      "superseded": "GB/T 16886.1-2011",
+      "replaces": "GB/T 16886.1-2011",
+      "family": "生物相容性",
+      "applies_to": ["骨科植入物", "有源器械", "无源器械"]
+    },
+    {
+      "code": "YY/T 0342",
+      "title": "外科植入物 接骨板弯曲强度和刚度试验方法",
+      "status": "current",
+      "adoption_date": "2020-09-27",
+      "effective_date": "2021-04-01",
+      "family": "力学疲劳",
+      "applies_to": ["接骨板"]
+    },
+    {
+      "code": "YY/T 0119.1",
+      "title": "脊柱植入物 脊柱内固定系统 第1部分：通用要求",
+      "status": "current",
+      "adoption_date": "2014-06-16",
+      "effective_date": "2015-04-01",
+      "family": "脊柱植入物",
+      "applies_to": ["椎弓根螺钉", "脊柱内固定系统"]
+    },
+    {
+      "code": "GB 9706.1",
+      "title": "医用电气设备 第1部分：基本安全和基本性能的通用要求",
+      "status": "current",
+      "adoption_date": "2020-04-09",
+      "effective_date": "2023-05-01",
+      "superseded": "GB 9706.1-2007",
+      "family": "电气安全",
+      "applies_to": ["有源器械"]
+    },
+    {
+      "code": "YY/T 0316",
+      "title": "医疗器械 风险管理对医疗器械的应用",
+      "status": "superseded",
+      "adoption_date": "2016-01-26",
+      "effective_date": "2017-01-01",
+      "superseded_by": "ISO 14971:2019 / GB/T 42062",
+      "family": "风险管理",
+      "applies_to": ["全部"]
+    },
+    {
+      "code": "GB/T 42062",
+      "title": "医疗器械 风险管理对医疗器械的应用",
+      "status": "current",
+      "adoption_date": "2022-10-12",
+      "effective_date": "2023-05-01",
+      "replaces": "YY/T 0316",
+      "family": "风险管理",
+      "applies_to": ["全部"]
+    }
+  ]
+}

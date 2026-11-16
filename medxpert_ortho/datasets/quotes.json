@@ -1,0 +1,13 @@
+{
+  "_disclaimer": "示例数据：价格为演示用区间，不代表任何机构真实报价，不构成商务承诺。",
+  "currency": "CNY",
+  "quotes": [
+    {"lab_id": "LAB-DEMO-01", "scope": "力学疲劳", "unit": "项", "low": 38000, "high": 62000, "lead_time_days": 45, "included_samples": 5},
+    {"lab_id": "LAB-DEMO-01", "scope": "骨科植入物", "unit": "项", "low": 26000, "high": 41000, "lead_time_days": 30, "included_samples": 3},
+    {"lab_id": "LAB-DEMO-01", "scope": "生物相容性", "unit": "项", "low": 45000, "high": 78000, "lead_time_days": 60, "included_samples": 3},
+    {"lab_id": "LAB-DEMO-02", "scope": "材料表征", "unit": "项", "low": 9000, "high": 16000, "lead_time_days": 15, "included_samples": 5},
+    {"lab_id": "LAB-DEMO-02", "scope": "耐腐蚀", "unit": "项", "low": 12000, "high": 21000, "lead_time_days": 20, "included_samples": 5},
+    {"lab_id": "LAB-DEMO-03", "scope": "电气安全", "unit": "项", "low": 18000, "high": 32000, "lead_time_days": 25, "included_samples": 2},
+    {"lab_id": "LAB-DEMO-03", "scope": "软件确认", "unit": "项", "low": 30000, "high": 55000, "lead_time_days": 40, "included_samples": 1}
+  ]
+}

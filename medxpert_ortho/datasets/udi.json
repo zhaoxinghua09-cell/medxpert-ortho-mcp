@@ -1,0 +1,9 @@
+{
+  "_disclaimer": "示例数据：UDI-DI 为虚构编号，仅用于演示查表与校验逻辑，不对应任何真实产品。",
+  "entries": [
+    {"udi_di": "06900000000001", "brand": "示例品牌A", "device": "锁定接骨板系统", "class": "III", "nmpa_category": "骨科植入物", "sterile": true, "single_use": true},
+    {"udi_di": "06900000000002", "brand": "示例品牌A", "device": "椎弓根螺钉", "class": "III", "nmpa_category": "脊柱植入物", "sterile": true, "single_use": true},
+    {"udi_di": "06900000000003", "brand": "示例品牌B", "device": "骨科手术导航工作站", "class": "II", "nmpa_category": "有源手术设备", "sterile": false, "single_use": false},
+    {"udi_di": "06900000000004", "brand": "示例品牌C", "device": "骨科动力系统附件", "class": "II", "nmpa_category": "有源手术设备", "sterile": true, "single_use": true}
+  ]
+}

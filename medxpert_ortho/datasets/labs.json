@@ -1,0 +1,32 @@
+{
+  "_disclaimer": "示例数据：机构名称、能力范围与联系人均为虚构样例，用于演示工具语义。正式使用请用 ORTHO_DATA_DIR 指向你自己的资质目录。",
+  "labs": [
+    {
+      "id": "LAB-DEMO-01",
+      "name": "示例检测机构甲（骨科植入物）",
+      "region": "CN-JS",
+      "scope": ["骨科植入物", "力学疲劳", "生物相容性", "无菌屏障", "加速老化"],
+      "accreditation": ["CNAS", "CMA"],
+      "contact": "demo-lab-a@example.invalid",
+      "notes": "示例记录：具备疲劳与磨损台架能力。"
+    },
+    {
+      "id": "LAB-DEMO-02",
+      "name": "示例检测机构乙（材料与表面）",
+      "region": "CN-SH",
+      "scope": ["材料表征", "涂层附着", "耐腐蚀", "显微分析"],
+      "accreditation": ["CNAS"],
+      "contact": "demo-lab-b@example.invalid",
+      "notes": "示例记录：强项在材料侧而非整机疲劳。"
+    },
+    {
+      "id": "LAB-DEMO-03",
+      "name": "示例检测机构丙（电气与软件）",
+      "region": "CN-GD",
+      "scope": ["电气安全", "电磁兼容", "软件确认", "可用性"],
+      "accreditation": ["CNAS", "CMA"],
+      "contact": "demo-lab-c@example.invalid",
+      "notes": "示例记录：有源骨科器械为主。"
+    }
+  ]
+}

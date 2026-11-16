@@ -1,0 +1,35 @@
+{
+  "_disclaimer": "示例数据：时间为演示用相对天数，非官方审评时限承诺。",
+  "regions": [
+    {"code": "CN", "name": "中国境内", "authority": "NMPA", "route_note": "Ⅲ类由国家局受理，Ⅱ类由省级局受理；境外生产者在境内需指定代理人。"},
+    {"code": "CN-JS", "name": "江苏省", "authority": "江苏省药品监督管理局", "route_note": "Ⅱ类省级受理；骨科植入物常见补充材料为生物学评价与临床评价资料。"},
+    {"code": "CN-SH", "name": "上海市", "authority": "上海市药品监督管理局", "route_note": "Ⅱ类省级受理；对注册质量体系核查有单独排期。"}
+  ],
+  "timelines": [
+    {
+      "procedure": "骨科植入物注册",
+      "region": "CN",
+      "phases": [
+        {"name": "体系建立与型式检验", "offset_days": 0, "duration_days": 90},
+        {"name": "临床评价资料准备", "offset_days": 60, "duration_days": 120},
+        {"name": "申报受理", "offset_days": 180, "duration_days": 10},
+        {"name": "技术审评", "offset_days": 190, "duration_days": 180},
+        {"name": "体系核查", "offset_days": 220, "duration_days": 60},
+        {"name": "行政审批与发证", "offset_days": 370, "duration_days": 30}
+      ],
+      "required_documents": ["产品技术要求", "检验报告", "生物学评价资料", "临床评价资料", "说明书与标签", "质量管理体系文件"]
+    },
+    {
+      "procedure": "有源骨科设备注册",
+      "region": "CN",
+      "phases": [
+        {"name": "电气安全与EMC检验", "offset_days": 0, "duration_days": 60},
+        {"name": "软件确认资料", "offset_days": 30, "duration_days": 60},
+        {"name": "申报受理", "offset_days": 90, "duration_days": 10},
+        {"name": "技术审评", "offset_days": 100, "duration_days": 120},
+        {"name": "审批发证", "offset_days": 220, "duration_days": 30}
+      ],
+      "required_documents": ["产品技术要求", "电气安全与EMC报告", "软件确认资料", "可用性工程资料", "说明书与标签"]
+    }
+  ]
+}

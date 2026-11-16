@@ -1,0 +1,42 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.zhaoxinghua09-cell/medxpert-ortho-mcp",
+  "title": "MedXpert 骨科器械检测对接（8 工具）",
+  "description": "Orthopedic device testing connector: lab matching, quotation estimation, UDI checks, dual-temporal standards lookup, class/path judgment trees, region routes, registration timelines and gap reports. Offline, zero dependencies, illustrative sample data bundled.",
+  "version": "0.1.0",
+  "websiteUrl": "https://medxpert.cn",
+  "repository": {
+    "url": "https://github.com/zhaoxinghua09-cell/medxpert-ortho-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "medxpert-ortho-mcp",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "ORTHO_DATA_DIR",
+          "description": "Directory of your own JSON datasets (labs/quotes/udi/standards/judgment_trees/timelines). Omit to use the bundled sample data.",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "publisher": "MedXpert.org / Zhao Xinghua (Steven Zhao)",
+      "license": "Apache-2.0",
+      "runtime_egress": "none (fully offline, stdlib only)",
+      "tool_count": 8,
+      "tools": "match_labs, calc_quote, check_udi, query_standard, find_judgment_tree, get_region_path, check_timeline, report_gap",
+      "verify_command": "uvx medxpert-ortho-mcp",
+      "data_note": "All bundled datasets are illustrative samples, not an accreditation directory, a price commitment or a regulatory conclusion. Every tool result carries sample_data: true until ORTHO_DATA_DIR points at your own data.",
+      "provenance": "Built 2026-11-16 to satisfy a dependency that four MedXpert expert packs had referenced since 2026 while it did not exist."
+    }
+  }
+}

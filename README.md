@@ -1,0 +1,120 @@
+# medxpert-ortho-mcp · Orthopedic device testing connector
+
+**English first, Chinese below.**
+
+An MCP server with 8 tools for orthopedic device testing work: lab matching, quotation estimation,
+UDI checks, dual-temporal standards lookup, class/path judgment trees, region routes,
+registration timelines and gap reports. Offline, standard library only, zero dependencies.
+
+It exists because four MedXpert expert packs (`medxpert-standards`, `medical-device-reg-translator`,
+`medical-device-testing-link`, `med-device-compliance-toolkit`) had been referencing a connector called
+`medxpert-ortho-mcp` that was never built. This is that connector, built.
+
+## What is real and what is sample
+
+| Aspect | Status |
+|---|---|
+| The server, the 8 tools, the protocol layer | **Real.** Implemented, unit-tested, published to PyPI and to the official MCP Registry |
+| The datasets shipped in `datasets/` | **Sample.** Invented labs, invented prices, invented UDI-DIs. Illustrative only |
+| Every tool result | Carries `sample_data: true` until you set `ORTHO_DATA_DIR` |
+
+The bundled data is **not** an accreditation directory, **not** a price commitment, and **not**
+a regulatory conclusion. Point `ORTHO_DATA_DIR` at your own JSON files to use real evidence.
+
+## Run
+
+```bash
+uvx medxpert-ortho-mcp          # stdio MCP server
+python -m medxpert_ortho.server --selftest   # offline self-test, no host needed
+```
+
+MCP host configuration:
+
+```json
+{"mcpServers": {"medxpert-ortho-mcp": {"command": "uvx", "args": ["medxpert-ortho-mcp"]}}}
+```
+
+Custom data directory:
+
+```json
+{"mcpServers": {"medxpert-ortho-mcp": {
+  "command": "uvx", "args": ["medxpert-ortho-mcp"],
+  "env": {"ORTHO_DATA_DIR": "/path/to/your/datasets"}}}}
+```
+
+## Tools
+
+| Tool | What it does | Honest limit |
+|---|---|---|
+| `match_labs` | Ranks labs by capability keyword, region and device description | Sample data has 3 labs and a few capability items |
+| `calc_quote` | Price range by lab and scope, total estimated by quantity (>included samples +12%) | Prices are illustrative; not a commercial offer |
+| `check_udi` | 14-digit UDI-DI lookup, returns class / sterile / single-use | Misses are explained as sample-data scope, not proof of absence |
+| `query_standard` | Keyword search with `as_of` dual-temporal judgement (in force? superseded?) | Status fields are demo logic; verify against the official current version |
+| `find_judgment_tree` | Step-by-step classification / route questions | A demo tree, not a review decision |
+| `get_region_path` | Authority, route note and required documents per region | Sample routes only for CN / CN-JS / CN-SH |
+| `check_timeline` | Expands relative days into calendar dates, marks completed / in_progress / not_started, flags overdue | Durations are illustrative; official clocks start at acceptance |
+| `report_gap` | Compares present documents against the required checklist | Checklist is sample data |
+
+## Design notes
+
+- **Zero dependencies.** JSON-RPC 2.0 over stdin/stdout, implemented with the standard library only.
+  No network calls at runtime; nothing leaves the machine.
+- **Provenance in every answer.** A tool that cannot say whether it answered from sample data or
+  from your own data is a tool you cannot audit, so every result says which.
+- **Mismatch is reported, not smoothed over.** A UDI miss says "sample scope", a tree miss lists what
+  trees exist, an empty lab match returns a hint rather than an empty success.
+
+## Gate
+
+`.github/workflows/ci.yml` runs the unit tests and `tools/version_gate.py`, which checks
+version consistency across `pyproject.toml`, `__init__.py`, `server.json` and the declared tool
+count, and reports how many `uses:` references are pinned to full SHAs.
+
+---
+
+# medxpert-ortho-mcp · 骨科器械检测对接连接器
+
+**先英后中。**
+
+一个 8 工具的 MCP server，用于骨科器械检测对接：机构匹配、报价估算、UDI 校验、双时态标准检索、
+分类/路径判定树、地区路径、注册时间轴、缺口报告。离线、仅标准库、零依赖。
+
+它存在的理由：四个 MedXpert 专家包（`medxpert-standards`、`medical-device-reg-translator`、
+`medical-device-testing-link`、`med-device-compliance-toolkit`）从 2026 年起一直引用一个叫
+`medxpert-ortho-mcp` 的连接器，而那个连接器从未被造出来。这就是它，现在有了。
+
+## 哪些是真的，哪些是示例
+
+| 方面 | 状态 |
+|---|---|
+| 服务本身、8 个工具、协议层 | **真的。** 已实现、有单元测试、已发布到 PyPI 与官方 MCP Registry |
+| `datasets/` 里的数据 | **示例。** 虚构机构、虚构价格、虚构 UDI-DI，仅供演示 |
+| 每个工具返回值 | 只要没设 `ORTHO_DATA_DIR`，一律带 `sample_data: true` |
+
+包内数据**不是**资质目录、**不是**报价承诺、**不是**法规结论。要用于真实工作，把
+`ORTHO_DATA_DIR` 指向你自己的 JSON 数据目录。
+
+## 运行
+
+```bash
+uvx medxpert-ortho-mcp                        # 起 stdio MCP 服务
+python -m medxpert_ortho.server --selftest   # 离线自测，不需要宿主
+```
+
+## 工具与诚实的边界
+
+| 工具 | 做什么 | 边界 |
+|---|---|---|
+| `match_labs` | 按能力关键词、地区、器械描述给机构打分 | 示例数据仅 3 家机构、少数能力项 |
+| `calc_quote` | 按机构与能力项给价格区间，超出含样量 +12% | 价格为演示值，不构成商务报价 |
+| `check_udi` | 14 位 UDI-DI 查表，回出分类/无菌/一次性 | 未命中会说明是示例范围，不是"不存在"的证据 |
+| `query_standard` | 关键词检索 + `as_of` 双时态判定（是否生效、是否被替代） | 状态字段为演示逻辑，以官方现行版为准 |
+| `find_judgment_tree` | 逐步问答式分类/路径判定 | 演示结构，不是审评结论 |
+| `get_region_path` | 受理机关、路径说明、必备材料 | 仅 CN / CN-JS / CN-SH 三条示例路径 |
+| `check_timeline` | 相对天数展开成日历，标 completed / in_progress / not_started 与逾期 | 天数为示例；官方时限自受理起算 |
+| `report_gap` | 已具备材料对照必备清单，报缺口与完整度 | 清单为示例数据 |
+
+## 门禁
+
+`ci.yml` 跑单元测试 + `tools/version_gate.py`：核对 `pyproject.toml`、`__init__.py`、`server.json`
+与声明的工具数是否一致，并自报 `uses:` 有多少处钉了完整 SHA。
