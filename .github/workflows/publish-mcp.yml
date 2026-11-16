@@ -48,6 +48,7 @@ jobs:
         run: ./mcp-publisher login github-oidc
 
       - name: Wait until PyPI serves this version
+        if: steps.check.outputs.already_exists == 'false'
         run: |
           python3 - <<'PY'
           import json, sys, time, urllib.request
