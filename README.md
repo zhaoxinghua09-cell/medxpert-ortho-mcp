@@ -1,5 +1,7 @@
 # medxpert-ortho-mcp · Orthopedic device testing connector
 
+mcp-name: io.github.zhaoxinghua09-cell/medxpert-ortho-mcp
+
 **English first, Chinese below.**
 
 An MCP server with 8 tools for orthopedic device testing work: lab matching, quotation estimation,
