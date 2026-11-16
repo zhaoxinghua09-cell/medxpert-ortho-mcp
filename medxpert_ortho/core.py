@@ -11,21 +11,133 @@ import json
 import os
 
 DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets")
-CUSTOM_DIR = os.environ.get("ORTHO_DATA_DIR", "").strip()
+
+# 每个数据集文件的必需顶层键。缺键会在加载时就失败，而不是等到某个工具
+# 在深处抛 KeyError——那种失败看起来像"工具坏了"，实际是数据不合规。
+REQUIRED_KEYS = {
+    "labs.json": ("labs",),
+    "quotes.json": ("quotes",),
+    "udi.json": ("entries",),
+    "standards.json": ("standards",),
+    "judgment_trees.json": ("trees",),
+    "timelines.json": ("regions", "timelines"),
+}
+
+
+class DataError(ValueError):
+    """数据不可用。错误信息必须写明文件与路径，否则调用方无从修。"""
+
+
+def custom_dir():
+    """返回 ORTHO_DATA_DIR。设了却不可用就报错——绝不静默退回示例数据。"""
+    raw = os.environ.get("ORTHO_DATA_DIR", "").strip()
+    if not raw:
+        return ""
+    path = os.path.abspath(os.path.expanduser(raw))
+    if not os.path.isdir(path):
+        raise DataError("ORTHO_DATA_DIR 指向的目录不存在：%s（不会静默退回示例数据）" % path)
+    return path
 
 
 def data_dir():
-    return CUSTOM_DIR if CUSTOM_DIR and os.path.isdir(CUSTOM_DIR) else DATASET_DIR
+    return custom_dir() or DATASET_DIR
 
 
 def is_sample():
-    return data_dir() == DATASET_DIR
+    return not custom_dir()
 
 
 def load(name):
     path = os.path.join(data_dir(), name)
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+    if not os.path.exists(path):
+        raise DataError("数据集文件缺失：%s（当前数据目录 %s）" % (path, data_dir()))
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        raise DataError("数据集不是合法 JSON：%s（第 %d 行第 %d 列：%s）"
+                        % (path, e.lineno, e.colno, e.msg))
+    if not isinstance(data, dict):
+        raise DataError("数据集顶层必须是对象：%s（实际是 %s）" % (path, type(data).__name__))
+    missing = [k for k in REQUIRED_KEYS.get(name, ()) if k not in data]
+    if missing:
+        raise DataError("数据集缺少顶层键 %s：%s（期望含 %s）"
+                        % (missing, path, list(REQUIRED_KEYS.get(name, ()))))
+    return data
+
+
+def validate_data():
+    """把数据目录整体体检一遍，返回结构化报告。
+
+    存在理由是上一版的一个静默失败：数据放错位置时，工具照常给出示例结论。
+    """
+    report = {"data_dir": None, "sample_data": None, "ok": True, "files": [], "cross_checks": []}
+
+    def issue(code, message):
+        report["ok"] = False
+        report["files"].append({"code": code, "message": message})
+
+    try:
+        report["data_dir"] = data_dir()
+        report["sample_data"] = is_sample()
+    except DataError as e:
+        issue("data_dir", str(e))
+        return report
+
+    loaded = {}
+    for fname, keys in REQUIRED_KEYS.items():
+        try:
+            loaded[fname] = load(fname)
+            report["files"].append({"file": fname, "ok": True, "keys": list(keys)})
+        except DataError as e:
+            issue("load:" + fname, str(e))
+
+    if not report["ok"]:
+        return report
+
+    labs = [l for l in loaded["labs.json"]["labs"] if isinstance(l, dict) and l.get("id")]
+    lab_ids = {l["id"] for l in labs}
+    bad_lab = [l for l in loaded["labs.json"]["labs"] if not (isinstance(l, dict) and l.get("id"))]
+    if bad_lab:
+        issue("labs:shape", "labs.json 有 %d 条机构缺少 id" % len(bad_lab))
+
+    orphan_quotes = sorted({q["lab_id"] for q in loaded["quotes.json"]["quotes"]
+                            if q.get("lab_id") not in lab_ids})
+    if orphan_quotes:
+        issue("quotes:orphan", "quotes.json 引用了 labs.json 里不存在的机构：%s" % orphan_quotes)
+
+    bad_udi = [e for e in loaded["udi.json"]["entries"]
+               if not (str(e.get("udi_di", "")).isdigit() and len(str(e.get("udi_di"))) == 14)]
+    if bad_udi:
+        issue("udi:format", "udi.json 有 %d 条不是 14 位数字 UDI-DI" % len(bad_udi))
+
+    bad_status = [s.get("code") for s in loaded["standards.json"]["standards"]
+                  if s.get("status") not in ("current", "superseded")]
+    if bad_status:
+        issue("standards:status", "standards.json 的 status 只接受 current/superseded：%s" % bad_status)
+
+    region_codes = {r["code"] for r in loaded["timelines.json"]["regions"] if r.get("code")}
+    for tl in loaded["timelines.json"]["timelines"]:
+        if not tl.get("phases"):
+            issue("timelines:phases", "时间轴 %s 没有 phases" % tl.get("procedure"))
+        for ph in tl.get("phases") or []:
+            if not isinstance(ph.get("offset_days"), int) or not isinstance(ph.get("duration_days"), int):
+                issue("timelines:phase_shape",
+                      "%s 的阶段 %s 的 offset_days/duration_days 必须是整数"
+                      % (tl.get("procedure"), ph.get("name")))
+        if not tl.get("required_documents"):
+            issue("timelines:docs", "时间轴 %s 没有 required_documents" % tl.get("procedure"))
+
+    report["cross_checks"] = [
+        {"check": "quotes.lab_id ⊆ labs.id", "ok": not orphan_quotes},
+        {"check": "udi_di 均 14 位数字", "ok": not bad_udi},
+        {"check": "standards.status 枚举", "ok": not bad_status},
+        {"check": "timelines 阶段与要件齐备", "ok": report["ok"]},
+        {"check": "regions 编码可用", "ok": bool(region_codes)},
+    ]
+    if not region_codes:
+        issue("regions:empty", "timelines.json 的 regions 为空")
+    return report
 
 
 def _norm(s):

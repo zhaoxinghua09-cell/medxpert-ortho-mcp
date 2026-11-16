@@ -1,6 +1,9 @@
 """确定性测试：每个工具都要有正例与反例，反例必须真的报错或返回 found=False。"""
+import json
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -132,6 +135,81 @@ class TestProvenance(unittest.TestCase):
         self.assertTrue(core.match_labs("力学疲劳")["sample_data"])
         self.assertTrue(core.check_udi("06900000000001")["sample_data"])
         self.assertTrue(core.report_gap(["产品技术要求"])["sample_data"])
+
+
+class TestDataGuard(unittest.TestCase):
+    """数据层必须"坏就吼"。上一版最危险的失败是：路径写错，工具照常给出示例结论。"""
+
+    def setUp(self):
+        self._old = os.environ.get("ORTHO_DATA_DIR")
+        self.tmp = tempfile.mkdtemp(prefix="ortho_bad_")
+
+    def tearDown(self):
+        if self._old is None:
+            os.environ.pop("ORTHO_DATA_DIR", None)
+        else:
+            os.environ["ORTHO_DATA_DIR"] = self._old
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_missing_dir_fails_loudly_not_silently(self):
+        os.environ["ORTHO_DATA_DIR"] = os.path.join(self.tmp, "nope")
+        with self.assertRaises(core.DataError) as ctx:
+            core.match_labs("力学疲劳")
+        self.assertIn("nope", str(ctx.exception))
+        self.assertIn("不会静默退回", str(ctx.exception))
+
+    def test_missing_file_names_the_file(self):
+        os.environ["ORTHO_DATA_DIR"] = self.tmp
+        with self.assertRaises(core.DataError) as ctx:
+            core.check_udi("06900000000002")
+        self.assertIn("udi.json", str(ctx.exception))
+
+    def test_broken_json_reports_position(self):
+        os.environ["ORTHO_DATA_DIR"] = self.tmp
+        path = os.path.join(self.tmp, "labs.json")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write('{"labs": [}')
+        with self.assertRaises(core.DataError) as ctx:
+            core.match_labs("力学疲劳")
+        self.assertIn("不是合法 JSON", str(ctx.exception))
+
+    def test_missing_top_level_key_is_named(self):
+        os.environ["ORTHO_DATA_DIR"] = self.tmp
+        with open(os.path.join(self.tmp, "labs.json"), "w", encoding="utf-8") as f:
+            f.write('{"institutions": []}')
+        with self.assertRaises(core.DataError) as ctx:
+            core.match_labs("力学疲劳")
+        self.assertIn("labs", str(ctx.exception))
+
+    def test_validate_passes_on_bundled_data(self):
+        os.environ.pop("ORTHO_DATA_DIR", None)
+        rep = core.validate_data()
+        self.assertTrue(rep["ok"], rep)
+        self.assertTrue(rep["sample_data"])
+
+    def test_validate_flags_orphan_quote(self):
+        os.environ["ORTHO_DATA_DIR"] = self.tmp
+        shutil.copytree(core.DATASET_DIR, self.tmp, dirs_exist_ok=True)
+        q = os.path.join(self.tmp, "quotes.json")
+        data = json.loads(open(q, encoding="utf-8").read())
+        data["quotes"][0]["lab_id"] = "LAB-GHOST"
+        with open(q, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        rep = core.validate_data()
+        self.assertFalse(rep["ok"])
+        self.assertTrue(any(f.get("code") == "quotes:orphan" for f in rep["files"]))
+
+    def test_validate_flags_short_udi(self):
+        os.environ["ORTHO_DATA_DIR"] = self.tmp
+        shutil.copytree(core.DATASET_DIR, self.tmp, dirs_exist_ok=True)
+        p = os.path.join(self.tmp, "udi.json")
+        data = json.loads(open(p, encoding="utf-8").read())
+        data["entries"][0]["udi_di"] = "0690000000000"   # 13 位
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        rep = core.validate_data()
+        self.assertFalse(rep["ok"])
+        self.assertTrue(any(f.get("code") == "udi:format" for f in rep["files"]))
 
 
 if __name__ == "__main__":

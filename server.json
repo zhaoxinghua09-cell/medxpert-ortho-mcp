@@ -3,7 +3,7 @@
   "name": "io.github.zhaoxinghua09-cell/medxpert-ortho-mcp",
   "title": "MedXpert 骨科器械检测对接（8 工具）",
   "description": "Orthopedic device testing MCP: lab match, quotes, UDI, standards, timelines, gap reports. Offline.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "websiteUrl": "https://medxpert.cn",
   "repository": {
     "url": "https://github.com/zhaoxinghua09-cell/medxpert-ortho-mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "pypi",
       "identifier": "medxpert-ortho-mcp",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

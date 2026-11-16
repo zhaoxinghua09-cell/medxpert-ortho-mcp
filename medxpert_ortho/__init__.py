@@ -8,4 +8,4 @@
 （环境变量 ORTHO_DATA_DIR）。
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"

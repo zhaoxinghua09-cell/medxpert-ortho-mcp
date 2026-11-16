@@ -172,7 +172,24 @@ def selftest():
     print("=== 自测结束 ===")
 
 
+def validate_data_cli():
+    """体检当前数据目录。放错路径或字段不合规时，这里退出码 1，而不是让工具给出示例结论。"""
+    rep = core.validate_data()
+    print(json.dumps(rep, ensure_ascii=False, indent=2))
+    if not rep["ok"]:
+        print("DATA CHECK: FAIL")
+        for f in rep.get("files", []):
+            if f.get("code"):
+                print("  - %s: %s" % (f["code"], f["message"]))
+        return 1
+    print("DATA CHECK: PASS (files=%d, data_dir=%s)"
+          % (len(rep["files"]), rep["data_dir"]))
+    return 0
+
+
 def main():
+    if "--validate-data" in sys.argv:
+        return validate_data_cli()
     if "--selftest" in sys.argv:
         selftest()
     else:

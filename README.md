@@ -23,11 +23,35 @@ It exists because four MedXpert expert packs (`medxpert-standards`, `medical-dev
 The bundled data is **not** an accreditation directory, **not** a price commitment, and **not**
 a regulatory conclusion. Point `ORTHO_DATA_DIR` at your own JSON files to use real evidence.
 
+## Data that does not fit fails loudly
+
+A wrong data path used to be the most dangerous state this server could be in: the tools would keep
+answering, from sample data, and `sample_data: true` was the only clue. That is a silent failure with
+a regulatory conclusion on the far end of it, so it is now an error:
+
+| Situation | Behaviour |
+|---|---|
+| `ORTHO_DATA_DIR` set, directory missing | The call fails with the path in the message. It never falls back to samples |
+| A required dataset file missing | Fails, naming the file and the directory in use |
+| Malformed JSON | Fails, naming file, line and column |
+| JSON valid but top-level keys wrong | Fails, listing the keys that are required |
+| Structurally bad content (orphan lab reference, 13-digit UDI, unknown status, empty phase list) | Reported by the check below, per file and per cross-check |
+
+Check your own data before relying on it:
+
+```bash
+ORTHO_DATA_DIR=/path/to/your/datasets python -m medxpert_ortho.server --validate-data
+```
+
+It prints a structured report, `DATA CHECK: PASS` or `FAIL`, and exits `1` on failure — so it can be
+a CI step rather than a ritual.
+
 ## Run
 
 ```bash
 uvx medxpert-ortho-mcp          # stdio MCP server
 python -m medxpert_ortho.server --selftest   # offline self-test, no host needed
+python -m medxpert_ortho.server --validate-data   # check ORTHO_DATA_DIR (or the bundled samples)
 ```
 
 MCP host configuration:
@@ -65,6 +89,8 @@ Custom data directory:
   from your own data is a tool you cannot audit, so every result says which.
 - **Mismatch is reported, not smoothed over.** A UDI miss says "sample scope", a tree miss lists what
   trees exist, an empty lab match returns a hint rather than an empty success.
+- **Bad input is an error, not a quiet fallback.** See above: the server will not answer from samples
+  while your data path is broken. The check is also runnable as `--validate-data` with a non-zero exit.
 
 ## Gate
 
@@ -96,11 +122,34 @@ count, and reports how many `uses:` references are pinned to full SHAs.
 包内数据**不是**资质目录、**不是**报价承诺、**不是**法规结论。要用于真实工作，把
 `ORTHO_DATA_DIR` 指向你自己的 JSON 数据目录。
 
+## 数据不合规就报错，不静默降级
+
+数据路径写错，曾是这台服务最危险的状态：工具照常作答，用示例数据答，唯一线索只有一个
+`sample_data: true`。这是会一路传导到法规结论的静默失败，所以现在改成报错：
+
+| 情形 | 行为 |
+|---|---|
+| `ORTHO_DATA_DIR` 设了但目录不存在 | 调用直接失败，错误信息里带路径；**绝不退回示例数据** |
+| 必需的数据集文件缺失 | 失败，并指出文件名与当前数据目录 |
+| JSON 语法错 | 失败，并指出文件、行、列 |
+| JSON 合法但顶层键不对 | 失败，并列出必需的顶层键 |
+| 结构性问题（报价指向不存在的机构、13 位 UDI、非法 status、阶段为空） | 由下面的体检逐文件、逐交叉项报出 |
+
+用自己的数据之前先体检：
+
+```bash
+ORTHO_DATA_DIR=/path/to/your/datasets python -m medxpert_ortho.server --validate-data
+```
+
+输出结构化报告，末行 `DATA CHECK: PASS` 或 `FAIL`，失败时退出码 `1`——因此它可以进 CI，
+而不只是一次仪式。
+
 ## 运行
 
 ```bash
 uvx medxpert-ortho-mcp                        # 起 stdio MCP 服务
 python -m medxpert_ortho.server --selftest   # 离线自测，不需要宿主
+python -m medxpert_ortho.server --validate-data   # 体检 ORTHO_DATA_DIR（或包内示例）
 ```
 
 ## 工具与诚实的边界
